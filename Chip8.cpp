@@ -2,13 +2,14 @@
 Author: Scott Field
 Name: Prototype Zero Chip 8 Emulator
 Version: 1.0
-Date: 11/12/2023
+Date: 11/13/2023
 Description:
-To Test Out The Prototype Zero Chip 8 Emulator
+Form The Framework For The Next Series Of Chip-8 Prototype Emulators To Be Built Off of
 */
 #include <windows.h> //For Sound Emulation
 #include <fstream> //For File Reading
 #include <ctime> //For Random Number
+#include <iostream> //For Printing Output When Testing
 
 class Chip8
 {
@@ -38,8 +39,6 @@ class Chip8
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 
-    //Independent Program Functions
-    
     //Set The Values Within The Function Pointers To Intially Point To Null
     typedef void (Chip8::*Chip8Table)();
     Chip8Table setNull(Chip8Table * table,int length){
@@ -47,33 +46,6 @@ class Chip8
             table[i] = &OP_NULL;
         } 
         return *table;
-    }
-
-    //Load The Program From The File
-    void loadProgram(char const* filename){
-        // Open the file as a stream of binary and move the file pointer to the end
-        std::ifstream file(filename, std::ios::binary | std::ios::ate);
-
-        if (file.is_open())
-        {
-            // Get size of file and allocate a buffer to hold the contents
-            std::streampos size = file.tellg();
-            char* buffer = new char[size];
-
-            // Go back to the beginning of the file and fill the buffer
-            file.seekg(0, std::ios::beg);
-            file.read(buffer, size);
-            file.close();
-
-            // Load the ROM contents into the emulators memory, starting at 0x200
-            for (long i = 0; i < size; ++i)
-            {
-                memory[START_ADDRESS + i] = buffer[i];
-            }
-
-            // Free the buffer
-            delete[] buffer;
-        }
     }
 
     //Chip-8 Random Number Function
@@ -84,17 +56,76 @@ class Chip8
         return int(rand() % 256);
     }
 
-    //Execute The Next Instruction From The Program
+    //Public Class Methods
+    public: 
+        //Clear The Values Currently In The Emulator
+        void clearEmulator(){
+            //Clear All The Emulated Variables (By setting the memory within them to unsigned 0)
+            memset(registers    ,   0u  , sizeof(registers)   );
+            memset(memory       ,   0u  , sizeof(memory)      );
+            memset(&index       ,   0u  , sizeof(index)       );
+            memset(&pc          ,   0u  , sizeof(pc)          );
+            memset(stack        ,   0u  , sizeof(stack)       );
+            memset(&sp          ,   0u  , sizeof(sp)          );
+            memset(&delayTimer  ,   0u  , sizeof(delayTimer)  );
+            memset(&soundTimer  ,   0u  , sizeof(soundTimer)  );
+            memset(keypad       ,   0u  , sizeof(keypad)      );
+            memset(video        ,   0u  , sizeof(video)       );
+            memset(&opcode      ,   0u  , sizeof(opcode)      );
+        }
+
+        //Load The Program From The File (This Needs Some Input Validation To Ensure That The File Is A Valid)
+        void loadProgram(char const* filename){
+            // Open the file as a stream of binary and move the file pointer to the end
+            std::ifstream file(filename, std::ios::binary | std::ios::ate);
+
+            if (file.is_open())
+            {
+                // First Clear The Variables From The Last Opened File
+                clearEmulator();
+                // Next Get size of file and allocate a buffer to hold the contents
+                std::streampos size = file.tellg();
+                char* buffer = new char[size];
+
+                // Go back to the beginning of the file and fill the buffer
+                file.seekg(0, std::ios::beg);
+                file.read(buffer, size);
+                file.close();
+
+                // Load the ROM contents into the emulators memory, starting at 0x200
+                for (long i = 0; i < size; ++i)
+                {
+                    memory[START_ADDRESS + i] = buffer[i];
+                }
+
+                // Free the buffer
+                delete[] buffer;
+            }
+        }
+
+        //Execute The Next Instruction From The Program
         void nextInstruction(){
             //First Read The Two-Byte Opcode From Memory 
             opcode = (memory[pc] << 8u) | memory[(pc + 1)];
             //Second increment the program counter by 2
             pc += 2;
-            //Decode The Opcode Using The Function Table, Attempting To Perform The Instruction
-            (opcode & 0xF000); //This is unfinished (Math Is Right But Needs To Be Tied To The Function Table(s))
-    }
+            //Decode The Opcode Using The Function Table To Determine Which Operation Needs To Be Performed
+            ((*this).*(MASTER_TABLE[(opcode & 0xF000u) >> 12u]))(); 
+            
+            //If The Delay Timer Has Been Set, Decrement It
+            if (delayTimer > 0){
+                --delayTimer;
+            }
+
+            //If The Sound Timer Has Been Set, Decrement It
+            if (soundTimer > 0){
+                --soundTimer;
+            }
+
+        }
 
 
+    //Public Variables And Constructors
     public:
         //This Is The Storage Of The Chip-8 Program, It Contains Sixteen 8 bit registers to Store Program Results
         unsigned char registers[16]{};
@@ -125,36 +156,6 @@ class Chip8
         unsigned int video[32][64]{};
         //This Is The Operation Code, It stores what instruction is being performed by the emulator.
         unsigned short opcode;
-
-        
-        //function pointer table (This Table Redirects To Other Tables And Holds Instructions In Which The Entire OpCode Is Unique)
-        Chip8Table MASTER_TABLE[16] = {
-            &Table0,
-            &OP_1nnn,
-            &OP_2nnn,
-            &OP_3xkk,
-            &OP_4xkk,
-            &OP_5xy0,
-            &OP_6xkk,
-            &OP_7xkk,
-            &Table8,
-            &OP_9xy0,
-            &OP_Annn,
-            &OP_Bnnn,
-            &OP_Cxkk,
-            &OP_Dxyn,
-            &TableE,
-            &TableF
-        };
-        //function pointer sub tables Intializes Their Values To Automatically Point To The Command Not Found Function (OP_NULL)
-        Chip8Table subTable0[15] = {setNull(subTable0,15)};
-        
-        Chip8Table subTable8[15] = {setNull(subTable8,15)};
-
-        Chip8Table subTableE[15] = {setNull(subTableE,15)};
-        
-        Chip8Table subTableF[102] = {setNull(subTableF,102)};
-
 
         //Constructor
         Chip8()
@@ -200,11 +201,41 @@ class Chip8
             subTableF[0x65] = &OP_Fx65;
         }
 
+    //Private Function Tables and Emulator Functions
+    private:    
+        //function pointer table (This Table Redirects To Other Tables And Holds Instructions In Which The Entire OpCode Is Unique)
+        Chip8Table MASTER_TABLE[16] = {
+            &Table0,
+            &OP_1nnn,
+            &OP_2nnn,
+            &OP_3xkk,
+            &OP_4xkk,
+            &OP_5xy0,
+            &OP_6xkk,
+            &OP_7xkk,
+            &Table8,
+            &OP_9xy0,
+            &OP_Annn,
+            &OP_Bnnn,
+            &OP_Cxkk,
+            &OP_Dxyn,
+            &TableE,
+            &TableF
+        };
+        //function pointer sub tables Intializes Their Values To Automatically Point To The Command Not Found Function (OP_NULL)
+        Chip8Table subTable0[15] = {setNull(subTable0,15)};
+        
+        Chip8Table subTable8[15] = {setNull(subTable8,15)};
+
+        Chip8Table subTableE[15] = {setNull(subTableE,15)};
+        
+        Chip8Table subTableF[102] = {setNull(subTableF,102)};
+
         //Instruction List Function Implementation
         
-        //Stores The Two Instructions Beginning With: 00
+        //Stores A Pointer To The Two Instructions Beginning With: 00
         void Table0(){ 
-
+            ((*this).*(subTable0[opcode & 0x000Fu]))();
         }
 
         //Table 0 Functions
@@ -214,8 +245,9 @@ class Chip8
             void OP_00EE(){  
             }
 
-        //Stores The Nine Instructions Beginning With: 8
+        //Stores A Pointer To The Nine Instructions Beginning With: 8
         void Table8(){
+            ((*this).*(subTable8[opcode & 0x000Fu]))();
         }
 
         //Table 8 Functions
@@ -245,8 +277,9 @@ class Chip8
 
             void OP_8xyE(){
             }
-        //Stores The Two Instructions Beginning With: E
+        //Stores A Pointer To The Two Instructions Beginning With: E
         void TableE(){
+            ((*this).*(subTable8[opcode & 0x000Fu]))();
         }
 
         //Table E Functions
@@ -256,8 +289,9 @@ class Chip8
             void OP_Ex9E(){
             }
 
-        //Stores The Nine Instructions Beginning With: F
+        //Stores A Pointer To The Nine Instructions Beginning With: F
         void TableF(){
+            ((*this).*(subTableF[opcode & 0x00FFu]))();
         }
 
         //Table F Functions
@@ -281,40 +315,51 @@ class Chip8
             }
 
         //Master Table Functions (Functions That Have Unique Identifiers)
-            void OP_1nnn(){
-            }
-            void OP_2nnn(){
-            }
-            void OP_3xkk(){
-            }
-            void OP_4xkk(){
-            }
-            void OP_5xy0(){
-            }
-            void OP_6xkk(){
-            }
-            void OP_7xkk(){
-            }
-            void OP_9xy0(){
-            }
-            void OP_Annn(){
-            }
-            void OP_Bnnn(){
-            }
-            void OP_Cxkk(){
-            }
-            void OP_Dxyn(){
-            }
+        void OP_1nnn(){
+        }
+        void OP_2nnn(){
+        }
+        void OP_3xkk(){
+        }
+        void OP_4xkk(){
+        }
+        void OP_5xy0(){
+        }
+        void OP_6xkk(){
+        }
+        void OP_7xkk(){
+        }
+        void OP_9xy0(){
+        }
+        void OP_Annn(){
+        }
+        void OP_Bnnn(){
+        }
+        void OP_Cxkk(){
+        }
+        void OP_Dxyn(){
+        }
 
         //Operation Not Found Function
-            void OP_NULL(){
-            }
+        void OP_NULL(){
+            //Print Error Message
+            std::cout << "Unknown Instruction: " << opcode;
+            //Exit Entire Program (Show That A Problem Occurred)
+            std::exit(EXIT_FAILURE);
+        }
     };
 
     
-
     //Instruction List
     int main(){
-        //The beep is the indication that the class is running without error
-        Beep(440,500);
+        //Test Clear Emulator Function
+        Chip8 myEmulator = Chip8();
+    
+        myEmulator.pc = 3;
+        std::cout << "Program Counter: " << myEmulator.pc << "\n";
+
+        myEmulator.clearEmulator();
+        std::cout << "Cleared Program Counter: " << myEmulator.pc;
+        //Sound Test
+        //Beep(440,500);
     }   
