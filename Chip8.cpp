@@ -144,7 +144,7 @@ class Chip8
         unsigned short stack[16]{}; 
         //This is The Stack Pointer, It contains One 8 bit register to store the memory address to the top of the Stack (The most recently added instruction)
         unsigned char sp{};
-        //This is The Built In Delay Timer, It contains One 8 bit register to store a value used for timing in the program (We will set it to delay based on clock speed)
+        //This is The Built In Delay Timer, It contains One 8 bit register to store a value used for timing in the program 
         unsigned char delayTimer{};
         //This is The Built In Sound Timer, It contains One 8 bit register and will play a sound every time it is decremented until reaching 0 
         unsigned char soundTimer{};
