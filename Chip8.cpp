@@ -2,7 +2,7 @@
 Author: Scott Field
 Name: Prototype Zero Chip 8 Emulator
 Version: 1.0
-Date: 11/13/2023
+Date: 11/27/2023
 Description:
 Form The Framework For The Next Series Of Chip-8 Prototype Emulators To Be Built Off of
 */
@@ -11,6 +11,33 @@ Form The Framework For The Next Series Of Chip-8 Prototype Emulators To Be Built
 #include <ctime> //For Random Number
 #include <iostream> //For Printing Output When Testing
 
+//Non Class Related Functions
+// Function to set all values in an unsigned char array to a parameter value
+void setAllValues(unsigned char *vector, unsigned char value) {
+    int length = sizeof(vector);
+    for (int index = 0; index < length; index++) {
+        vector[index] = value;
+    }
+}
+
+// Function to set all values in an unsigned short array to a parameter value
+void setAllValues(unsigned short *vector, unsigned short value) {
+    int length = sizeof(vector);
+    for (int index = 0; index < length; index++) {
+        vector[index] = value;
+    }
+}
+
+// Function to set all values in the video int array to a parameter value
+void setAllValues(unsigned int (*vector)[64], unsigned int value) {
+    for (int outer = 0; outer < 32; outer++){
+        for (int inner = 0; inner < 64; inner++){
+            vector[outer][inner] = value;
+        }
+    }
+}
+
+//Emulator Class Start
 class Chip8
 {
     //Program Constants
@@ -60,18 +87,17 @@ class Chip8
     public: 
         //Clear The Values Currently In The Emulator
         void clearEmulator(){
-            //Clear All The Emulated Variables (By setting the memory within them to unsigned 0)
-            memset(registers    ,   0u  , sizeof(registers)   );
-            memset(memory       ,   0u  , sizeof(memory)      );
-            memset(&index       ,   0u  , sizeof(index)       );
-            memset(&pc          ,   0u  , sizeof(pc)          );
-            memset(stack        ,   0u  , sizeof(stack)       );
-            memset(&sp          ,   0u  , sizeof(sp)          );
-            memset(&delayTimer  ,   0u  , sizeof(delayTimer)  );
-            memset(&soundTimer  ,   0u  , sizeof(soundTimer)  );
-            memset(keypad       ,   0u  , sizeof(keypad)      );
-            memset(video        ,   0u  , sizeof(video)       );
-            memset(&opcode      ,   0u  , sizeof(opcode)      );
+            setAllValues(registers  , static_cast<unsigned char>(0u));
+            setAllValues(memory     , static_cast<unsigned char>(0u));
+            index = 0u;
+            pc = 0u;
+            setAllValues(stack      , static_cast<short>        (0u));
+            sp = 0u;
+            delayTimer = 0u;
+            soundTimer = 0u;
+            setAllValues(keypad     , static_cast<short>        (0u));
+            setAllValues(video      ,                            0u );
+            opcode = 0u;
         }
 
         //Load The Program From The File (This Needs Some Input Validation To Ensure That The File Is A Valid)
@@ -137,17 +163,17 @@ class Chip8
         */
         unsigned char memory[0x1000]{};
         //This Is The Index Register of The Chip-8 Program, It contains One 16 bit register To store memory addresses that other operations will make use of
-        unsigned short index{};
+        unsigned short index = 0u;
         //This Is The Program Counter of The Chip-8 Program, It contains One 16 bit register To store the memory address of the next instruction to execute
-        unsigned short pc{};
+        unsigned short pc = 0u;
         //This Is The Program Stack, It contains One 16 bit register to store the program order of execution (This may later use a C++ Stack Instead of a C++ Vector)
         unsigned short stack[16]{}; 
         //This is The Stack Pointer, It contains One 8 bit register to store the memory address to the top of the Stack (The most recently added instruction)
-        unsigned char sp{};
+        unsigned char sp = 0u;
         //This is The Built In Delay Timer, It contains One 8 bit register to store a value used for timing in the program 
-        unsigned char delayTimer{};
+        unsigned char delayTimer = 0u;
         //This is The Built In Sound Timer, It contains One 8 bit register and will play a sound every time it is decremented until reaching 0 
-        unsigned char soundTimer{};
+        unsigned char soundTimer = 0u;
         /*This is The Key Register, It contains One 8 Bit register to store which input keys are currently being pressed / not being pressed, 
         Every key exists in a state of pressed (1) or unpressed (0)*/
         unsigned char keypad[16]{};
@@ -340,7 +366,7 @@ class Chip8
         void OP_Dxyn(){
         }
 
-        //Operation Not Found Function
+        //Operation Not Found Function (This Will Be Updated With An Exception Later)
         void OP_NULL(){
             //Print Error Message
             std::cout << "Unknown Instruction: " << opcode;
@@ -350,16 +376,13 @@ class Chip8
     };
 
     
-    //Instruction List
+    //Main Is For Testing Any Functions Of The Emulator Comment It Out After You Are Finished
+    /*
     int main(){
         //Test Clear Emulator Function
         Chip8 myEmulator = Chip8();
     
-        myEmulator.pc = 3;
-        std::cout << "Program Counter: " << myEmulator.pc << "\n";
-
-        myEmulator.clearEmulator();
-        std::cout << "Cleared Program Counter: " << myEmulator.pc;
         //Sound Test
         //Beep(440,500);
     }   
+    */
