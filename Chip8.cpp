@@ -267,9 +267,11 @@ class Chip8
                 //OP_00E0
                 case 0x0E0:
                     ((*this).*(subTable0[0]))();
+                    break;
                 //OP_00EE
                 case 0x0EE:
                     ((*this).*(subTable0[1]))();
+                    break;
                 //OP_0nnn
                 default:
                     ((*this).*(subTable0[2]))();
