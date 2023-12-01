@@ -166,7 +166,7 @@ class Chip8
         unsigned short index = 0u;
         //This Is The Program Counter of The Chip-8 Program, It contains One 16 bit register To store the memory address of the next instruction to execute
         unsigned short pc = 0u;
-        //This Is The Program Stack, It contains One 16 bit register to store the program order of execution (This may later use a C++ Stack Instead of a C++ Vector)
+        //This Is The Program Stack, It contains One 16 bit register to store the program order of execution 
         unsigned short stack[16]{}; 
         //This is The Stack Pointer, It contains One 8 bit register to store the memory address to the top of the Stack (The most recently added instruction)
         unsigned char sp = 0u;
@@ -196,9 +196,10 @@ class Chip8
 
             //Overwrite The Command Not Found Function (OP_NULL) In The Sub Tables Where The Other Functions Need To Be Inserted
 
-            //Sub Table 0 Overwrite
-            subTable0[0x0] = &Chip8::OP_00E0;
-		    subTable0[0xE] = &Chip8::OP_00EE;
+            //Sub Table 0 Overwrite (This Table Has A Different Structure Than ALL OTHER SUB TABLES)
+            subTable0[0] = &OP_00E0;
+		    subTable0[1] = &OP_00EE;
+            subTable0[2] = &OP_0nnn;
 
             //Sub Table 8 Overwrite
             subTable8[0x0] = &OP_8xy0;
@@ -234,22 +235,22 @@ class Chip8
             &Table0,
             &OP_1nnn,
             &OP_2nnn,
-            &OP_3xkk,
-            &OP_4xkk,
+            &OP_3xnn,
+            &OP_4xnn,
             &OP_5xy0,
-            &OP_6xkk,
-            &OP_7xkk,
+            &OP_6xnn,
+            &OP_7xnn,
             &Table8,
             &OP_9xy0,
             &OP_Annn,
             &OP_Bnnn,
-            &OP_Cxkk,
+            &OP_Cxnn,
             &OP_Dxyn,
             &TableE,
             &TableF
         };
         //function pointer sub tables Intializes Their Values To Automatically Point To The Command Not Found Function (OP_NULL)
-        Chip8Table subTable0[15] = {setNull(subTable0,15)};
+        Chip8Table subTable0[3] = {}; //subtable0 no longer needs any values set to OP_NULL (impossible to call OP_NULL when starting opcode digit is 0)
         
         Chip8Table subTable8[15] = {setNull(subTable8,15)};
 
@@ -261,10 +262,25 @@ class Chip8
         
         //Stores A Pointer To The Two Instructions Beginning With: 00
         void Table0(){ 
-            ((*this).*(subTable0[opcode & 0x000Fu]))();
+            //Using The Last 3 Digits
+            switch(opcode & 0x0FFF){
+                //OP_00E0
+                case 0x0E0:
+                    ((*this).*(subTable0[0]))();
+                //OP_00EE
+                case 0x0EE:
+                    ((*this).*(subTable0[1]))();
+                //OP_0nnn
+                default:
+                    ((*this).*(subTable0[2]))();
+            }
+            //((*this).*(subTable0[opcode & 0x000Fu]))();
         }
 
         //Table 0 Functions
+            void OP_0nnn(){
+            }
+
             void OP_00E0(){
             }
 
@@ -345,15 +361,15 @@ class Chip8
         }
         void OP_2nnn(){
         }
-        void OP_3xkk(){
+        void OP_3xnn(){
         }
-        void OP_4xkk(){
+        void OP_4xnn(){
         }
         void OP_5xy0(){
         }
-        void OP_6xkk(){
+        void OP_6xnn(){
         }
-        void OP_7xkk(){
+        void OP_7xnn(){
         }
         void OP_9xy0(){
         }
@@ -361,7 +377,7 @@ class Chip8
         }
         void OP_Bnnn(){
         }
-        void OP_Cxkk(){
+        void OP_Cxnn(){
         }
         void OP_Dxyn(){
         }
@@ -376,13 +392,15 @@ class Chip8
     };
 
     
-    //Main Is For Testing Any Functions Of The Emulator Comment It Out After You Are Finished
+    //Main Is For Testing Any Functions Of The Emulator Please Comment It Out After You Are Finished
     /*
     int main(){
-        //Test Clear Emulator Function
+        //Define Emulator
         Chip8 myEmulator = Chip8();
     
         //Sound Test
-        //Beep(440,500);
-    }   
+        Beep(440,500);
+    } 
     */
+      
+    
