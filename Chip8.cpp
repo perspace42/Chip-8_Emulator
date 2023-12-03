@@ -2,14 +2,38 @@
 Author: Scott Field
 Name: Prototype Zero Chip 8 Emulator
 Version: 1.0
-Date: 11/27/2023
+Date: 12/02/2023
 Description:
 Form The Framework For The Next Series Of Chip-8 Prototype Emulators To Be Built Off of
 */
 #include <windows.h> //For Sound Emulation
 #include <fstream> //For File Reading
 #include <ctime> //For Random Number
-#include <iostream> //For Printing Output When Testing
+#include <iostream> //For Printing Output When Testing and Exception Class
+#include <iomanip> //For Editing Stream Data
+#include <string> //For Exception Messages and Dialog Messages
+#include <sstream> //For Conveting OpCode To Hex Values When Output
+
+//Custom Exceptions
+class NullOperationException : public std::exception{
+private:
+   std::string errorMessage;
+public:
+    NullOperationException(const std::string& message) : errorMessage(message) {} 
+    const char* what() const throw() {
+        return errorMessage.c_str();
+    }
+};
+
+class UnsupportedLanguageException : public std::exception{
+private:
+   std::string errorMessage;
+public:
+    UnsupportedLanguageException(const std::string& message) : errorMessage(message) {} 
+    const char* what() const throw() {
+        return errorMessage.c_str();
+    }
+};
 
 //Non Class Related Functions
 // Function to set all values in an unsigned char array to a parameter value
@@ -35,6 +59,13 @@ void setAllValues(unsigned int(*vector)[64], unsigned int value) {
             vector[outer][inner] = value;
         }
     }
+}
+
+//function to convert the opcode to a hex string for output
+std::string toHexString(int number) {
+    std::stringstream ss;
+    ss << std::setfill('0') << std::setw(4) << std::hex << number;
+    return ss.str();
 }
 
 //Emulator Class Start
@@ -90,7 +121,7 @@ public:
         setAllValues(registers, static_cast<unsigned char>(0u));
         setAllValues(memory, static_cast<unsigned char>(0u));
         index = 0u;
-        pc = 0u;
+        pc = START_ADDRESS; //program counter should be at the start address for the next program which is always 0x200
         setAllValues(stack, static_cast<short>        (0u));
         sp = 0u;
         delayTimer = 0u;
@@ -100,11 +131,12 @@ public:
         opcode = 0u;
     }
 
-    //Load The Program From The File (This Needs Some Input Validation To Ensure That The File Is A Valid)
+    //Load The Program From The File
     void loadProgram(char const* filename) {
         // Open the file as a stream of binary and move the file pointer to the end
         std::ifstream file(filename, std::ios::binary | std::ios::ate);
 
+        //If the file is read successfully
         if (file.is_open())
         {
             // First Clear The Variables From The Last Opened File
@@ -126,6 +158,10 @@ public:
 
             // Free the buffer
             delete[] buffer;
+        
+        //Otherwise Throw An Exception
+        }else{
+            throw std::ios_base::failure("ERROR A problem occurred while attempting to open the file");
         }
     }
 
@@ -186,6 +222,13 @@ public:
     //Constructor
     Chip8()
     {
+        //Initialize Vector Values To 0 On Startup
+        setAllValues(registers, static_cast<unsigned char>(0u));
+        setAllValues(memory, static_cast<unsigned char>(0u));
+        setAllValues(stack, static_cast<short>        (0u));
+        setAllValues(keypad, static_cast<short>        (0u));
+        setAllValues(video, 0u);
+
         //set the first instruction as the next instruction to be executed
         pc = START_ADDRESS;
         for (unsigned int i = 0; i < 80; ++i)
@@ -278,9 +321,11 @@ private:
     }
 
         //Table 0 Functions
+            //This operation is invalid, and when run throws an exception explaining why
             void OP_0nnn() {
-
+                throw UnsupportedLanguageException("ERROR, The Operation: " + toHexString(opcode) + " Indicates That This Program Is Dependent Upon An Nonexistent Machine Language Subroutine");
             }
+
             void OP_00E0(){
             }
             //Return from a subroutine
@@ -395,6 +440,7 @@ private:
                 registers[0xFu] = registers[vyIndex] >> 3u;//get the most significant bit of VY and set VF to it
                 registers[vxIndex] = registers[vyIndex] << 1u;//set VX to VY shifted left one bit
             }
+
         //Stores A Pointer To The Two Instructions Beginning With: E
         void TableE(){
             ((*this).*(subTable8[opcode & 0x000Fu]))();
@@ -577,23 +623,35 @@ private:
         void OP_Dxyn(){
         }
 
-        //Operation Not Found Function (This Will Be Updated With An Exception Later)
+        //Operation Not Found Function
         void OP_NULL(){
-            //Print Error Message
-            std::cout << "Unknown Instruction: " << opcode;
-            //Exit Entire Program (Show That A Problem Occurred)
-            std::exit(EXIT_FAILURE);
+            throw NullOperationException("ERROR, The Operation: " + toHexString(opcode) + " Is Unrecognized");
         }
     };
 
     
-    //Main Is For Testing Any Functions Of The Emulator Comment It Out After You Are Finished
-    /*
+    //Main Is For Testing Any Functions Of The Emulator We Will Comment It Out After Integrating It With The UML
     int main(){
-        //Test Clear Emulator Function
+        //Test Emulator Functions
         Chip8 myEmulator = Chip8();
+        
+        //Break The Instruction Into Two Halves (Just Like The Memory List Does)
+        //Test Instruction 0nnn
+        unsigned char firstDigits = 0x0F;
+        unsigned char secondDigits = 0xFF;
+
+        //Assign The First Availble Memory An Instruction
+        myEmulator.memory[0x200] = firstDigits;
+        myEmulator.memory[0x201] = secondDigits;
+
+        //Try To Execute The Instruction
+        try{
+            myEmulator.nextInstruction();
+        }catch (const std::exception& e){
+            std::cout << "Caught exception: " << e.what() << "\n";
+        }
     
         //Sound Test
         //Beep(440,500);
     }   
-    */
+    
