@@ -2,7 +2,7 @@
 Author: Scott Field
 Name: Prototype Zero Chip 8 Emulator
 Version: 1.0
-Date: 12/02/2023
+Date: 12/04/2023
 Description:
 Form The Framework For The Next Series Of Chip-8 Prototype Emulators To Be Built Off of
 */
@@ -568,7 +568,7 @@ private:
 
         //Master Table Functions (Functions That Have Unique Identifiers)
 
-        //added 12/4/2023
+        //Jump to address nnn
         void OP_1nnn(){
             unsigned short address = (opcode & 0x0FFFu); //get hex memory address from opcode and assign to variable address
             pc = address; //set program counter to the obtained address
