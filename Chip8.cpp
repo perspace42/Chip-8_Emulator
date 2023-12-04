@@ -44,6 +44,14 @@ void setAllValues(unsigned char* vector, unsigned char value) {
     }
 }
 
+// Function to set all values in an unsigned char array, starting from a certain index, to a parameter value
+void setAllValues(unsigned char* vector, int startIndex, unsigned char value) {
+    int length = sizeof(vector);
+    for (startIndex; startIndex < length; startIndex++) {
+        vector[startIndex] = value;
+    }
+}
+
 // Function to set all values in an unsigned short array to a parameter value
 void setAllValues(unsigned short* vector, unsigned short value) {
     int length = sizeof(vector);
@@ -119,7 +127,7 @@ public:
     //Clear The Values Currently In The Emulator
     void clearEmulator() {
         setAllValues(registers, static_cast<unsigned char>(0u));
-        setAllValues(memory, static_cast<unsigned char>(0u));
+        setAllValues(memory, START_ADDRESS, static_cast<unsigned char>(0u));
         index = 0u;
         pc = START_ADDRESS; //program counter should be at the start address for the next program which is always 0x200
         setAllValues(stack, static_cast<short>        (0u));
@@ -222,9 +230,9 @@ public:
     //Constructor
     Chip8()
     {
-        //Initialize Vector Values To 0 On Startup
+        //Initialize Non Fixed Values To 0 On Startup
         setAllValues(registers, static_cast<unsigned char>(0u));
-        setAllValues(memory, static_cast<unsigned char>(0u));
+        setAllValues(memory, START_ADDRESS, static_cast<unsigned char>(0u));
         setAllValues(stack, static_cast<short>        (0u));
         setAllValues(keypad, static_cast<short>        (0u));
         setAllValues(video, 0u);
@@ -650,7 +658,6 @@ private:
         }catch (const std::exception& e){
             std::cout << "Caught exception: " << e.what() << "\n";
         }
-    
         //Sound Test
         //Beep(440,500);
     }   
