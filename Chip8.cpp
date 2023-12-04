@@ -333,8 +333,15 @@ private:
             void OP_0nnn() {
                 throw UnsupportedLanguageException("ERROR, The Operation: " + toHexString(opcode) + " Indicates That This Program Is Dependent Upon An Nonexistent Machine Language Subroutine");
             }
-
+            //Clear screen/display
             void OP_00E0(){
+                for(int i = 0; i < 32; i++)
+                    {
+                        for(int x = 0; x < 64; x++)
+                        {
+                            video[i][x]= 0;
+                        }
+                    }
             }
             //Return from a subroutine
             void OP_00EE(){  
@@ -560,7 +567,11 @@ private:
             }
 
         //Master Table Functions (Functions That Have Unique Identifiers)
+
+        //added 12/4/2023
         void OP_1nnn(){
+            unsigned short address = (opcode & 0x0FFFu); //get hex memory address from opcode and assign to variable address
+            pc = address; //set program counter to the obtained address
         }
         //Execute subroutine starting at address NNN
         void OP_2nnn(){
@@ -596,9 +607,17 @@ private:
                 pc += 2;
             }
         }
+        //Store number(nn) in register Vx
         void OP_6xnn(){
+              unsigned short vxIndex = (opcode & 0x0FFFu) >> 8u;
+            unsigned short num = (opcode & 0x00FFu); 
+            registers[vxIndex] = num; 
         }
+        //Add number (nn) to register Vx
         void OP_7xnn(){
+            unsigned short vxIndex = (opcode & 0x0FFFu) >> 8u;
+            unsigned short num = (opcode & 0x00FFu); 
+            registers[vxIndex] += num;
         }
         //Skip the following instruction if the value of register VX is not equal to the value of register VY
         void OP_9xy0(){
@@ -628,7 +647,34 @@ private:
             registers[vxIndex] = (getRandom() & nn);
 
         }
+        //Draw a sprite at position Vx, Vy with n bytes of sprite data starting at the address stored in
+        // 'I', set VF to 01 if any set pixels are changed to unset, and 00 otherwise
         void OP_Dxyn(){
+            unsigned short vxIndex = (opcode & 0x0FFFu) >> 8u;
+            unsigned short vyIndex = (opcode & 0x0FFFu) >> 4u;
+            unsigned char n_bytes = (opcode & 0x000Fu);
+            unsigned char sprite_data;
+            //variables for pixel values
+            int x, y;
+
+            for(int i = 0; i < n_bytes; i++)
+            {
+                sprite_data = memory[index + i]; //load in bytes of sprite data from position(index) in memory
+
+                for(int j = 0; j < 8; j++) //for loop to iterate through each bit in the byte
+                {
+                if(sprite_data & (0x80 >> j) != 0) //AND operation on each bit starting with leftmost bit, if 
+                {                                   // not equal to 0 then set pixel = 1;
+                    x = (vxIndex + j) % 64; //modulos between original pixel start point and next bit instruction, wraps back around if > 64
+                    y = (vyIndex + j) % 32; //modulos between original pixel start point and next bit instruction, wraps back around if > 32
+                    video[x][y] = 1; //set pixel
+
+                    if(video[x][y] == 0){  //check if pixel was unset, if so set register VF to 1
+                        registers[15] = 1;
+                    }
+                }
+                }
+            }
         }
 
         //Operation Not Found Function
