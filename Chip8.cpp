@@ -393,10 +393,11 @@ private:
             void OP_8xy4(){
                 unsigned short vxIndex = (opcode & 0x0F00u) >> 8u;
                 unsigned short vyIndex = (opcode & 0x00F0u) >> 4u;
+                int sum = registers[vxIndex] + registers[vyIndex];
 
                 registers[vxIndex] += registers[vyIndex];
 
-                if (registers[vxIndex] > 0xFFu) {//if VX is greater than 255 (its upper limit) after adding VY to it, sets VF to 01
+                if (sum > 0xFFu) {//if the sum of VX and VY is greater than 255 (its upper limit), sets VF to 01
                     registers[0xF] = 0x01u;
                 }
                 else {
