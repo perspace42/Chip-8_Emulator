@@ -13,6 +13,7 @@ Form The Framework For The Next Series Of Chip-8 Prototype Emulators To Be Built
 #include <iomanip> //For Editing Stream Data
 #include <string> //For Exception Messages and Dialog Messages
 #include <sstream> //For Conveting OpCode To Hex Values When Output
+#include <vector> //To shift memory size based on available instructions
 
 //Custom Exceptions
 class NullOperationException : public std::exception{
@@ -137,6 +138,7 @@ public:
         setAllValues(keypad, static_cast<short>        (0u));
         setAllValues(video, 0u);
         opcode = 0u;
+        pcStop = START_ADDRESS; //program stop should also be at the start address until the next program is loaded
     }
 
     //Load The Program From The File
@@ -162,6 +164,8 @@ public:
             for (long i = 0; i < size; ++i)
             {
                 memory[START_ADDRESS + i] = buffer[i];
+                //Increment The Stop Value
+                pcStop += 1;
             }
 
             // Free the buffer
@@ -187,8 +191,10 @@ public:
             --delayTimer;
         }
 
-        //If The Sound Timer Has Been Set, Decrement It
+        //If The Sound Timer Has Been Set, Decrement It And Make Sound
         if (soundTimer > 0) {
+            //Make Sound
+            Beep(300,250);
             --soundTimer;
         }
 
@@ -226,6 +232,9 @@ public:
     unsigned int video[32][64]{};
     //This Is The Operation Code, It stores what instruction is being performed by the emulator.
     unsigned short opcode;
+
+    //This Is The Stop Value, When The Program Counter Reaches This Value The Program Ceases
+    unsigned short pcStop = 0x200;
 
     //Constructor
     Chip8()
@@ -393,10 +402,11 @@ private:
             void OP_8xy4(){
                 unsigned short vxIndex = (opcode & 0x0F00u) >> 8u;
                 unsigned short vyIndex = (opcode & 0x00F0u) >> 4u;
+                int sum = registers[vxIndex] + registers[vyIndex];
 
                 registers[vxIndex] += registers[vyIndex];
 
-                if (registers[vxIndex] > 0xFFu) {//if VX is greater than 255 (its upper limit) after adding VY to it, sets VF to 01
+                if (sum > 0xFFu) {//if the sum of VX and VY is greater than 255 (its upper limit), sets VF to 01
                     registers[0xF] = 0x01u;
                 }
                 else {
@@ -685,26 +695,36 @@ private:
 
     
     //Main Is For Testing Any Functions Of The Emulator We Will Comment It Out After Integrating It With The UML
+    
     int main(){
         //Test Emulator Functions
         Chip8 myEmulator = Chip8();
         
         //Break The Instruction Into Two Halves (Just Like The Memory List Does)
-        //Test Instruction 0nnn
-        unsigned char firstDigits = 0x0F;
-        unsigned char secondDigits = 0xFF;
+        //Test Instruction 8xy0
+        unsigned char firstDigits = 0x81;
+        unsigned char secondDigits = 0x10;
 
         //Assign The First Availble Memory An Instruction
         myEmulator.memory[0x200] = firstDigits;
         myEmulator.memory[0x201] = secondDigits;
+        myEmulator.memory[0x202] = 0xD1;
+        myEmulator.memory[0x203] = 0x23;
 
+        //Increment The Stop Value (This Is Done Automatically When Loading A File)
+        myEmulator.pcStop += 4;
+
+        while (myEmulator.pc < myEmulator.pcStop){
         //Try To Execute The Instruction
-        try{
-            myEmulator.nextInstruction();
-        }catch (const std::exception& e){
-            std::cout << "Caught exception: " << e.what() << "\n";
+            try{  
+                myEmulator.nextInstruction();
+            }catch (const std::exception& e){
+                std::cout << "Caught exception: " << e.what() << "\n";
+            } 
+            std::cout << "Instruction: " + toHexString(myEmulator.opcode) + " executed\n";
         }
-        //Sound Test
-        //Beep(440,500);
-    }   
+        std::cout << "Done";
+    }
+    
+     
     
