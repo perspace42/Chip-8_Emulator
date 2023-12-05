@@ -412,7 +412,7 @@ private:
 
                 registers[vxIndex] -= registers[vyIndex];
 
-                if (registers[vxIndex] > 0xFFu) {
+                if (registers[vyIndex] > registers[vxIndex]) {//Check if VY is greater than VX to determine of a borrow occured
                     registers[0xF] = 0x00u;
                 }
                 else {
@@ -438,8 +438,8 @@ private:
 
                 registers[vxIndex] = registers[vyIndex] - registers[vxIndex];
 
-                if (registers[vxIndex] > 0xFFu) {//subtracting a smaller unsigned int from a larger unsigned int causes the number to loop to the largest number possible
-                    registers[0xFu] = 0x00u;     //therefore, if a borrow occurs, VX will be much larger than 255 and this if statement checks for that
+                if (registers[vxIndex] > registers[vyIndex]) {//Check if VX is greater than VY to determine of a borrow occured
+                    registers[0xFu] = 0x00u;     
                 }
                 else {
                     registers[0xFu] = 0x01u;
