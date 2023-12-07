@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "bindkeys.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -29,7 +30,12 @@ private slots:
 
     void on_actionExit_Program_triggered();
 
+    void on_Pause_toggled(bool arg1);
+
+    void on_actionChange_Keybinds_triggered();
+
 private:
     Ui::MainWindow *ui;
+    BindKeys *bindKeys;
 };
 #endif // MAINWINDOW_H
