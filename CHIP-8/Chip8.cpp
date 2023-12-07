@@ -15,6 +15,7 @@ Form The Framework For The Next Series Of Chip-8 Prototype Emulators To Be Built
 #include <sstream> //For Conveting OpCode To Hex Values When Output
 #include <vector> //To shift memory size based on available instructions
 
+
 //Custom Exceptions
 class NullOperationException : public std::exception{
 private:
@@ -257,57 +258,57 @@ public:
         //Overwrite The Command Not Found Function (OP_NULL) In The Sub Tables Where The Other Functions Need To Be Inserted
 
         //Sub Table 0 Overwrite (This Table Has A Different Structure Than ALL OTHER SUB TABLES)
-        subTable0[0] = &OP_00E0;
-        subTable0[1] = &OP_00EE;
-        subTable0[2] = &OP_0nnn;
+        subTable0[0] = &Chip8::OP_00E0;
+        subTable0[1] = &Chip8::OP_00EE;
+        subTable0[2] = &Chip8::OP_0nnn;
 
         //Sub Table 8 Overwrite
-        subTable8[0x0] = &OP_8xy0;
-        subTable8[0x1] = &OP_8xy1;
-        subTable8[0x2] = &OP_8xy2;
-        subTable8[0x3] = &OP_8xy3;
-        subTable8[0x4] = &OP_8xy4;
-        subTable8[0x5] = &OP_8xy5;
-        subTable8[0x6] = &OP_8xy6;
-        subTable8[0x7] = &OP_8xy7;
-        subTable8[0xE] = &OP_8xyE;
+        subTable8[0x0] = &Chip8::OP_8xy0;
+        subTable8[0x1] = &Chip8::OP_8xy1;
+        subTable8[0x2] = &Chip8::OP_8xy2;
+        subTable8[0x3] = &Chip8::OP_8xy3;
+        subTable8[0x4] = &Chip8::OP_8xy4;
+        subTable8[0x5] = &Chip8::OP_8xy5;
+        subTable8[0x6] = &Chip8::OP_8xy6;
+        subTable8[0x7] = &Chip8::OP_8xy7;
+        subTable8[0xE] = &Chip8::OP_8xyE;
 
         //Sub Table E Overwrite
-        subTableE[0x1] = &OP_ExA1;
-        subTableE[0xE] = &OP_00EE;
+        subTableE[0x1] = &Chip8::OP_ExA1;
+        subTableE[0xE] = &Chip8::OP_00EE;
 
         //Sub Table F Overwrite
-        subTableF[0x07] = &OP_Fx07;
-        subTableF[0x0A] = &OP_Fx0A;
-        subTableF[0x15] = &OP_Fx15;
-        subTableF[0x18] = &OP_Fx18;
-        subTableF[0x1E] = &OP_Fx1E;
-        subTableF[0x29] = &OP_Fx29;
-        subTableF[0x33] = &OP_Fx33;
-        subTableF[0x55] = &OP_Fx55;
-        subTableF[0x65] = &OP_Fx65;
+        subTableF[0x07] = &Chip8::OP_Fx07;
+        subTableF[0x0A] = &Chip8::OP_Fx0A;
+        subTableF[0x15] = &Chip8::OP_Fx15;
+        subTableF[0x18] = &Chip8::OP_Fx18;
+        subTableF[0x1E] = &Chip8::OP_Fx1E;
+        subTableF[0x29] = &Chip8::OP_Fx29;
+        subTableF[0x33] = &Chip8::OP_Fx33;
+        subTableF[0x55] = &Chip8::OP_Fx55;
+        subTableF[0x65] = &Chip8::OP_Fx65;
     }
 
     //Private Function Tables and Emulator Functions
 private:
     //function pointer table (This Table Redirects To Other Tables And Holds Instructions In Which The Entire OpCode Is Unique)
     Chip8Table MASTER_TABLE[16] = {
-        &Table0,
-        &OP_1nnn,
-        &OP_2nnn,
-        &OP_3xnn,
-        &OP_4xnn,
-        &OP_5xy0,
-        &OP_6xnn,
-        &OP_7xnn,
-        &Table8,
-        &OP_9xy0,
-        &OP_Annn,
-        &OP_Bnnn,
-        &OP_Cxnn,
-        &OP_Dxyn,
-        &TableE,
-        &TableF
+        &Chip8::Table0,
+        &Chip8::OP_1nnn,
+        &Chip8::OP_2nnn,
+        &Chip8::OP_3xnn,
+        &Chip8::OP_4xnn,
+        &Chip8::OP_5xy0,
+        &Chip8::OP_6xnn,
+        &Chip8::OP_7xnn,
+        &Chip8::Table8,
+        &Chip8::OP_9xy0,
+        &Chip8::OP_Annn,
+        &Chip8::OP_Bnnn,
+        &Chip8::OP_Cxnn,
+        &Chip8::OP_Dxyn,
+        &Chip8::TableE,
+        &Chip8::TableF
     };
     //function pointer sub tables Intializes Their Values To Automatically Point To The Command Not Found Function (OP_NULL)
     Chip8Table subTable0[3] = {}; //subtable0 no longer needs any values set to OP_NULL (impossible to call OP_NULL when starting opcode digit is 0)
