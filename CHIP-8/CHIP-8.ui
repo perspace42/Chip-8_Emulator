@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>CHIP-8 Emulator</string>
   </property>
   <property name="dockNestingEnabled">
    <bool>true</bool>
@@ -120,6 +120,9 @@
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextBesideIcon</enum>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -189,6 +192,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>../../Downloads/Pause.png</normaloff>
@@ -197,8 +203,14 @@
    <property name="text">
     <string>Pause</string>
    </property>
+   <property name="iconText">
+    <string>Pause</string>
+   </property>
    <property name="toolTip">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pause&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionColor">
