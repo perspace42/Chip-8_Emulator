@@ -172,8 +172,14 @@ public:
         {
             // First Clear The Variables From The Last Opened File
             clearEmulator();
-            // Next Get size of file and allocate a buffer to hold the contents
+            // Next Get size of file 
             std::streampos size = file.tellg();
+            // If the file is larger than the available memory throw an exception
+            if (size > 0x1000){
+                throw std::length_error("File size exceeds available memory");
+            }
+
+            //allocate a buffer to hold the contents
             char *buffer = new char[size];
 
             // Go back to the beginning of the file and fill the buffer
@@ -187,6 +193,11 @@ public:
                 memory[START_ADDRESS + i] = buffer[i];
                 // Increment The Stop Value
                 pcStop += 1;
+            }
+
+            // If the stop value is odd (ends in a partial instruction) decrement it by 1
+            if (pcStop % 2 != 0){
+                --pcStop;
             }
 
             // Free the buffer
@@ -203,25 +214,34 @@ public:
     // Execute The Next Instruction From The Program
     void nextInstruction()
     {
-        // First Read The Two-Byte Opcode From Memory
-        opcode = (memory[pc] << 8u) | memory[(pc + 1)];
-        // Second increment the program counter by 2
-        pc += 2;
-        // Decode The Opcode Using The Function Table To Determine Which Operation Needs To Be Performed
-        ((*this).*(MASTER_TABLE[(opcode & 0xF000u) >> 12u]))();
+        //If the program has not reached the end of its instructions
+        if (pc < pcStop){
 
-        // If The Delay Timer Has Been Set, Decrement It
-        if (delayTimer > 0)
-        {
-            --delayTimer;
-        }
+            // First Read The Two-Byte Opcode From Memory
+            opcode = (memory[pc] << 8u) | memory[(pc + 1)];
+            // Second increment the program counter by 2
+            pc += 2;
+            // Decode The Opcode Using The Function Table To Determine Which Operation Needs To Be Performed
+            ((*this).*(MASTER_TABLE[(opcode & 0xF000u) >> 12u]))();
 
-        // If The Sound Timer Has Been Set, Decrement It And Make Sound
-        if (soundTimer > 0)
-        {
-            // Make Sound
-            Beep(300, 250);
-            --soundTimer;
+            // If The Delay Timer Has Been Set, Decrement It
+            if (delayTimer > 0)
+            {
+                --delayTimer;
+            }
+
+            // If The Sound Timer Has Been Set, Decrement It And Make Sound
+            if (soundTimer > 0)
+            {
+                // Make Sound
+                Beep(300, 250);
+                --soundTimer;
+            }
+
+        //If the program has reached the end of its instructions (Chip-8 programs do not have a stop character, and therefore should always loop)
+        }else{
+            //Indicate that the problem is with the program itself
+            throw std::out_of_range("ERROR The CHIP-8 program terminated unexpectedly (Out of Instructions)");
         }
     }
 
@@ -785,6 +805,7 @@ private:
 
 // Main Is For Testing Any Functions Of The Emulator We Will Comment It Out After Integrating It With The UML
 
+
 int main()
 {
     // Test Emulator Functions
@@ -800,11 +821,13 @@ int main()
     myEmulator.memory[0x201] = secondDigits;
     myEmulator.memory[0x202] = 0xD1;
     myEmulator.memory[0x203] = 0x23;
+    myEmulator.memory[0x204] = 0x11;
 
-    // Increment The Stop Value (This Is Done Automatically When Loading A File)
-    myEmulator.pcStop += 4;
+    // Increment The Stop Value (This Is Done Automatically When Loading A File) It is being set here for testing
+    myEmulator.pcStop += 4; 
 
-    while (myEmulator.pc < myEmulator.pcStop)
+    boolean finished = false;
+    while (! finished)
     {
         // Try To Execute The Instruction
         try
@@ -814,8 +837,11 @@ int main()
         catch (const std::exception &e)
         {
             std::cout << "Caught exception: " << e.what() << "\n";
+            finished = true;
+            break;
         }
         std::cout << "Instruction: " + toHexString(myEmulator.opcode) + " executed\n";
     }
     std::cout << "Done";
 }
+
