@@ -391,13 +391,7 @@ private:
     // Clear screen/display
     void OP_00E0()
     {
-        for (int i = 0; i < 32; i++)
-        {
-            for (int x = 0; x < 64; x++)
-            {
-                video[i][x] = 0;
-            }
-        }
+        setAllValues(video,0u);
     }
     // Return from a subroutine
     void OP_00EE()
@@ -782,11 +776,11 @@ private:
                 {                           // changed from y = (vyIndex + j) % 32;
                     x = (vxIndex + j) % 64; // modulos between original pixel start point and next bit instruction, wraps back around if > 64
                     y = (vyIndex + i) % 32; // modulos between original pixel start point and next bit instruction, wraps back around if > 32
-                    if (video[x][y] == 1)
+                    if (video[y][x] == 1)
                         sentVal = true;
-                    video[x][y] = 1; // set pixel
+                    video[y][x] = 1; // set pixel
 
-                    if ((video[x][y] == 0) && sentVal == true)
+                    if ((video[y][x] == 0) && sentVal == true)
                     {                      // check if pixel was unset, if so set register VF to 1
                         registers[15] = 1; // for collision
                         sentVal = false;
