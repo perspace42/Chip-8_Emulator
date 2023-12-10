@@ -1,7 +1,7 @@
-#ifndef APPLICATIONLOOP_H
-#define APPLICATIONLOOP_H
-#include "Chip8.h"
+#include "ApplicationLoop.h"
 
+
+/* //This comment stores the applicationloop member variables as a reminder
 class ApplicationLoop {
     // Member Variables
     Chip8 emulator;
@@ -13,15 +13,15 @@ class ApplicationLoop {
         unsigned char gVal;
         unsigned char bVal;
     };
+}
+*/
+//Constructor
+ApplicationLoop::ApplicationLoop(Chip8 &emulatorAddress){
+}
 
-public:
-    // Constructor
-    ApplicationLoop(Chip8 &emulatorAddress);
+//Draw Method Implementation
+void ApplicationLoop::draw(int video[32][64]){
+}
 
-    // Methods
-    void draw(int video[32][64]);
-    void setCycleSpeed(int instructionsPerSecond);
-};
-
-#endif
-
+void ApplicationLoop::setCycleSpeed(int instructionsPerSecond){
+}

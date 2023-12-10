@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "Chip8.cpp"
+#include "Chip8.h"
 #include <QApplication>
 
 
