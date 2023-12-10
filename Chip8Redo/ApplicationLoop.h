@@ -1,9 +1,7 @@
 #ifndef APPLICATIONLOOP_H
 #define APPLICATIONLOOP_H
+#include "Chip8.h"
 
-#endif // APPLICATIONLOOP_H
-
-#include "Chip8.cpp"
 class ApplicationLoop {
     // Member Variables
     Chip8 emulator;
@@ -25,4 +23,5 @@ public:
     void setCycleSpeed(int instructionsPerSecond);
 };
 
-#endif // APPLICATIONLOOP_H
+#endif
+
