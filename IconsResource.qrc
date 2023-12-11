@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Icons/ColorPicker.png</file>
+        <file>Icons/Pause.PNG</file>
+        <file>Icons/Play.PNG</file>
+    </qresource>
+</RCC>
