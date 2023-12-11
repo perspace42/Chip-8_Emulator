@@ -1,8 +1,6 @@
 #include "mainwindow.h"
-#include "Chip8.h"
 #include <QApplication>
-
-
+#include "Chip8.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,7 +9,7 @@ int main(int argc, char *argv[])
 
     //QTextStream(stdout) << "Done";
     QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
+    MainWindow mainWindow(myEmulator);
+    mainWindow.show();
     return a.exec();
 }

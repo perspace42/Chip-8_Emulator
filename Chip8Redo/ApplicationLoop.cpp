@@ -25,3 +25,7 @@ void ApplicationLoop::draw(int video[32][64]){
 
 void ApplicationLoop::setCycleSpeed(int instructionsPerSecond){
 }
+
+void setColor(QColor newColor){
+    //currentColor = newColor
+}

@@ -191,7 +191,7 @@ public:
             if (soundTimer > 0)
             {
                 // Make Sound
-                Beep(300, 250);
+                Beep(300, 10);
                 --soundTimer;
             }
 
@@ -280,9 +280,11 @@ private:
             // OP_00E0
         case 0x0E0:
             ((*this).*(subTable0[0]))();
+            break;
             // OP_00EE
         case 0x0EE:
             ((*this).*(subTable0[1]))();
+            break;
             // OP_0nnn
         default:
             ((*this).*(subTable0[2]))();
@@ -381,10 +383,11 @@ private:
     {
         unsigned short vxIndex = (opcode & 0x0F00u) >> 8u;
         unsigned short vyIndex = (opcode & 0x00F0u) >> 4u;
+        int difference = registers[vxIndex] - registers[vyIndex];
 
         registers[vxIndex] -= registers[vyIndex];
 
-        if (registers[vxIndex] > 0xFFu)
+        if (difference < 0)
         {
             registers[0xF] = 0x00u;
         }
@@ -411,12 +414,13 @@ private:
     {
         unsigned short vxIndex = (opcode & 0x0F00u) >> 8u;
         unsigned short vyIndex = (opcode & 0x00F0u) >> 4u;
+        int difference = registers[vyIndex] - registers[vxIndex];
 
         registers[vxIndex] = registers[vyIndex] - registers[vxIndex];
 
-        if (registers[vxIndex] > 0xFFu)
-        {                            // subtracting a smaller unsigned int from a larger unsigned int causes the number to loop to the largest number possible
-            registers[0xFu] = 0x00u; // therefore, if a borrow occurs, VX will be much larger than 255 and this if statement checks for that
+        if (difference < 0)
+        {
+            registers[0xFu] = 0x00u;
         }
         else
         {
@@ -666,33 +670,34 @@ private:
     {
         unsigned short vxIndex = (opcode & 0x0F00u) >> 8u;
         unsigned short vyIndex = (opcode & 0x00F0u) >> 4u;
-        unsigned short n_bytes = (opcode & 0x000Fu);
-        unsigned short sprite_data;
-        bool sentVal = false; // boolean for checking if pixel was originally 1 then set to 0
-        // variables for pixel values
-        int x, y;
-        // set flag register to 0
-        registers[15] = 0;
+        unsigned char height = opcode & 0x000Fu;
 
-        for (int i = 0; i < n_bytes; i++)
-        {
-            sprite_data = memory[index + i]; // load in bytes of sprite data from position(index) in memory
-            // moved from loop }
-            for (int j = 0; j < 8; j++) // for loop to iterate through each bit in the byte
-            {
-                if ((sprite_data & (0x80 >> j)) != 0)
-                {                           // changed from y = (vyIndex + j) % 32;
-                    x = (vxIndex + j) % 64; // modulos between original pixel start point and next bit instruction, wraps back around if > 64
-                    y = (vyIndex + i) % 32; // modulos between original pixel start point and next bit instruction, wraps back around if > 32
-                    if (video[y][x] == 1)
-                        sentVal = true;
-                    video[y][x] = 1; // set pixel
+        // Get the starting memory address for the sprite data
+        unsigned short spriteAddress = index;
 
-                    if ((video[y][x] == 0) && sentVal == true)
-                    {                      // check if pixel was unset, if so set register VF to 1
-                        registers[15] = 1; // for collision
-                        sentVal = false;
-                    }
+        // Reset the collision flag (VF) to 0
+        registers[0xF] = 0;
+
+        // Loop through each row of the sprite
+        for (unsigned int row = 0; row < height; ++row) {
+            // Get the sprite data from memory
+            unsigned char spriteData = memory[spriteAddress + row];
+
+            // Loop through each pixel in the row
+            for (unsigned int col = 0; col < 8; ++col) {
+                // Extract the pixel value from the spriteData
+                unsigned char pixelValue = (spriteData & (0x80u >> col)) >> (7 - col);
+
+                // Calculate the position of the pixel on the screen
+                int x = (registers[vxIndex] + col) % 64;
+                int y = (registers[vyIndex] + row) % 32;
+
+                // XOR the pixel value with the current screen value
+                video[y][x] ^= pixelValue;
+
+                // Set VF to 1 if any set pixels are changed to unset
+                if (pixelValue == 1 && video[y][x] == 0) {
+                    registers[0xF] = 1;
                 }
             }
         }

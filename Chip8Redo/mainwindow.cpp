@@ -5,14 +5,16 @@
 #include <QInputDialog>
 #include <QFileDialog>
 
-
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(Chip8& emulator, QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow), emulatorRef(emulator)
 {
     ui->setupUi(this);
     bindKeys = new BindKeys(this);
-
-
+    scene = new QGraphicsScene(this);
+    scene->setBackgroundBrush(Qt::black);
+    ui->graphicsView->setScene(scene);
+    timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &MainWindow::emulateCycle);
 }
 
 MainWindow::~MainWindow()
@@ -24,20 +26,36 @@ void MainWindow::on_actionColor_triggered()
 {
     QColor color = QColorDialog::getColor(Qt::white, this, "Choose Color");
     if(color.isValid()) {
-
+        currentColor = color;
     }
 }
 //This action creates a dialog box that allows the user to enter the processing speed they want the program to run at.
 void MainWindow::on_actionSet_Speed_triggered()
 {
     bool ok;
-    double speed = QInputDialog::getDouble(this, tr("Enter the speed"), tr("New Speed"), 1, 0, 10, 1, &ok, Qt::WindowFlags(), 0.1);
+    int instructionsPerSecond = QInputDialog::getInt(this, tr("Enter the amount of instructions per second (default: 500)"), tr("Instructions Per Second"), 500, 1, 1001, 1, &ok, Qt::WindowFlags());
+
+    cycleSpeed = (1000 / instructionsPerSecond);
+    if(romLoaded){
+        timer->start(cycleSpeed);
+    }
 
 }
 //This action opens a file dialog that requests user to choose a CHIP-8 ROM from the files in their computer
 void MainWindow::on_actionLoad_ROM_triggered()
 {
-    QString filename = QFileDialog::getOpenFileName(this, "Choose a CHIP-8 ROM");
+    QString filenamestr = QFileDialog::getOpenFileName(this, "Choose a CHIP-8 ROM");
+
+    if (filenamestr.isNull()) {}
+    else {
+        QByteArray filenameByteArray = filenamestr.toUtf8();
+        const char* filename = filenameByteArray.constData();
+
+        emulatorRef.loadProgram(filename);
+        timer->start(cycleSpeed);
+        romLoaded = true;
+
+    }
 }
 //This action decreases the size of the graphics view window
 void MainWindow::on_DecreaseSize_clicked()
@@ -73,9 +91,13 @@ void MainWindow::on_Pause_toggled(bool arg1)
 {
     if(arg1) {
         ui->Pause->setIconText("Play");
+        timer->stop();
     }
     else {
         ui->Pause->setIconText("Pause");
+        if(romLoaded){
+            timer->start(cycleSpeed);
+        }
     }
 }
 
@@ -83,5 +105,14 @@ void MainWindow::on_Pause_toggled(bool arg1)
 void MainWindow::on_actionChange_Keybinds_triggered()
 {
     bindKeys->show();
+}
+
+
+void MainWindow::on_actionClose_ROM_triggered()
+{
+    emulatorRef.clearEmulator();
+    ui->graphicsView->scene()->clear();
+    timer->stop();
+    romLoaded = false;
 }
 

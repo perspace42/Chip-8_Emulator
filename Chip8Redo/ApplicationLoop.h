@@ -1,6 +1,7 @@
 #ifndef APPLICATIONLOOP_H
 #define APPLICATIONLOOP_H
 #include "Chip8.h"
+#include <QColor>
 
 class ApplicationLoop {
     // Member Variables
@@ -8,11 +9,7 @@ class ApplicationLoop {
     int cycleSpeed;
     bool paused;
     char boundKeys[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-    struct CurrentColor {
-        unsigned char rVal = 255;
-        unsigned char gVal;
-        unsigned char bVal;
-    };
+    QColor currentColor = Qt::white;
 
 public:
     // Constructor
@@ -21,6 +18,7 @@ public:
     // Methods
     void draw(int video[32][64]);
     void setCycleSpeed(int instructionsPerSecond);
+    void setColor(QColor newColor);
 };
 
 #endif
