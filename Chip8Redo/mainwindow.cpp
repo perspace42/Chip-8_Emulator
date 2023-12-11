@@ -44,17 +44,31 @@ void MainWindow::on_actionSet_Speed_triggered()
 //This action opens a file dialog that requests user to choose a CHIP-8 ROM from the files in their computer
 void MainWindow::on_actionLoad_ROM_triggered()
 {
+    //Open The Dialog
     QString filenamestr = QFileDialog::getOpenFileName(this, "Choose a CHIP-8 ROM");
 
-    if (filenamestr.isNull()) {}
-    else {
-        QByteArray filenameByteArray = filenamestr.toUtf8();
-        const char* filename = filenameByteArray.constData();
+    //Attempt To Open The File
+    try{
+        if (filenamestr.isNull() == false){
+            QByteArray filenameByteArray = filenamestr.toUtf8();
+            const char* filename = filenameByteArray.constData();
 
-        emulatorRef.loadProgram(filename);
-        timer->start(cycleSpeed);
-        romLoaded = true;
+            emulatorRef.loadProgram(filename);
+            timer->start(cycleSpeed);
+            romLoaded = true;
 
+        }
+    //If an Exception is thrown (file not valid, file to large) catch the resulting error and close the file
+    }catch(std::length_error error){
+        errorDialog->showMessage(error.what());
+        if (romLoaded){
+            on_actionClose_ROM_triggered();
+        }
+    }catch(std::ios_base::failure error){
+        errorDialog->showMessage(error.what());
+        if (romLoaded){
+            on_actionClose_ROM_triggered();
+        }
     }
 }
 //This action decreases the size of the graphics view window

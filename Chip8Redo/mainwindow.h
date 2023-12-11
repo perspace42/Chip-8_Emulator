@@ -8,6 +8,8 @@
 #include <QGraphicsScene>
 #include <QGraphicsRectItem>
 #include <QTimer>
+#include <QErrorMessage>
+#include <QMessageBox>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -41,12 +43,27 @@ private slots:
 
     void on_actionClose_ROM_triggered();
 
+    //Attempt To Run The Next Instruction, If an Exception Results Display The Error Message and Close The CHIP-8 Program
     void emulateCycle() {
-        // Execute one Chip-8 instruction per cycle
-        emulatorRef.nextInstruction();
-
-        // Update the graphics view
-        updateGraphics();
+        try{
+            // Attempt To Execute one Chip-8 instruction per cycle
+            emulatorRef.nextInstruction();
+            // Update the graphics view
+            updateGraphics();
+        }
+        //If an Exception Results Handle It
+        catch(NullOperationException error){
+            errorDialog->showMessage(error.what());
+            on_actionClose_ROM_triggered();
+        }
+        catch(UnsupportedLanguageException error){
+            errorDialog->showMessage(error.what());
+            on_actionClose_ROM_triggered();
+        }
+        catch(std::out_of_range error){
+            errorDialog->showMessage(error.what());
+            on_actionClose_ROM_triggered();
+        }
     }
 
     void updateGraphics(){
@@ -74,6 +91,7 @@ private:
     int cycleSpeed = 2;
     unsigned int video[32][64]{};
     static constexpr int PIXEL_SIZE = 10;
+    QErrorMessage *errorDialog = new QErrorMessage();
 };
 #endif // MAINWINDOW_H
 
