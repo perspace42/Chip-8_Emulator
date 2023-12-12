@@ -1,4 +1,5 @@
 **Chip-8_Emulator**
+
 An emulator that can run CHIP-8 programs through a Graphic User Interface developed with Qt5 and C++ 
 It contains the following features:
   - Pause / Play Emulation
