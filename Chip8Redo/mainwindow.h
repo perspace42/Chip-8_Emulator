@@ -22,7 +22,9 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(Chip8& emulator, QWidget *parent = nullptr);
     ~MainWindow();
-
+signals:
+    void keyPressed(Qt::Key key, Chip8& emulatorRef);
+    void keyReleased(Qt::Key key, Chip8& emulatorRef);
 private slots:
 
     void on_actionColor_triggered();
@@ -92,6 +94,8 @@ private:
     unsigned int video[32][64]{};
     static constexpr int PIXEL_SIZE = 10;
     QErrorMessage *errorDialog = new QErrorMessage();
+    void keyPressEvent(QKeyEvent* event);
+    void keyReleaseEvent(QKeyEvent* event);
 };
 #endif // MAINWINDOW_H
 

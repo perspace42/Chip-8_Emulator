@@ -459,7 +459,6 @@ void BindKeys::on_keySequenceEdit_C_editingFinished()
     }
 }
 
-
 void BindKeys::on_keySequenceEdit_V_editingFinished()
 {
     try {
@@ -480,4 +479,23 @@ void BindKeys::on_keySequenceEdit_V_editingFinished()
         msgBox.setText(e.what());
         msgBox.exec();
     }
+}
+//This funcion handles the signal for a key press and sets the corresponding key value inside the emulator
+//to a vlaue of 1
+void BindKeys::handleKeyPress(Qt::Key key, Chip8& EmulatorRef)
+{
+    if(key > bindKeys[0] && key <= bindKeys[15])
+        {
+            qDebug() << "Inside handle key press" << key;
+            EmulatorRef.keypad[key] = 1;
+        }
+}
+//This funcion handles the signal for a key release and sets the corresponding key value inside the emulator
+//to a vlaue of 0
+void BindKeys::handleKeyRelease(Qt::Key key, Chip8& EmulatorRef)
+{
+    if(key > bindKeys[0] && key <= bindKeys[15])
+        {
+            EmulatorRef.keypad[key] = 0;
+        }
 }

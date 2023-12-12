@@ -15,11 +15,23 @@ MainWindow::MainWindow(Chip8& emulator, QWidget *parent)
     ui->graphicsView->setScene(scene);
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::emulateCycle);
+    connect(this, &MainWindow::keyPressed, bindKeys, &BindKeys::handleKeyPress);
+    connect(this, &MainWindow::keyReleased, bindKeys, &BindKeys::handleKeyRelease);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+//This emits a signal with the key pressed and the Chip8 object to bindkeys class
+void MainWindow::keyPressEvent(QKeyEvent* event){
+    QMainWindow::keyPressEvent(event);
+    emit keyPressed(static_cast<Qt::Key>(event->key()), emulatorRef);
+}
+//This emits a signal with the key released and the Chip8 object to bindkeys class
+void MainWindow::keyReleaseEvent(QKeyEvent* event) {
+    QMainWindow::keyReleaseEvent(event);
+    emit keyReleased(static_cast<Qt::Key>(event->key()), emulatorRef);
 }
 //This action opens a window with a "color picker" that allows the user to choose a color
 void MainWindow::on_actionColor_triggered()
