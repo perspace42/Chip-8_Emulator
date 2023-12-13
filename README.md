@@ -10,7 +10,7 @@ It contains the following features:
   - Exit Program
 **Install Instructions**
 To install the Chip-8 emulator you can either download the entire repository (if you want to build the project yourself), or to only download the releases folder (if you only want to run the project executable)
-  - If you choose to download only the releases folder, run the executable .exe file inside to run the project.
+  - If you choose to download only the releases folder, open it, then run the executable Chip8Redo.exe file inside to run the project (be careful not to change anything within the releases folder).
   - If you choose to download the entire repository continue with these steps:
     + Download Qt Creator from the following URL:
       https://www.qt.io/product/development-tools
