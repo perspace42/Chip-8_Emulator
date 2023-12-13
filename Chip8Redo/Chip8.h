@@ -8,7 +8,6 @@
 #include <iomanip>   //For Editing Stream Data
 #include <string>    //For Exception Messages and Dialog Messages
 #include <sstream>   //For Conveting OpCode To Hex Values When Output
-#include <QDebug>
 
 class NullOperationException : public std::exception
 {
@@ -452,7 +451,6 @@ private:
     {
         unsigned short vxIndex = (opcode & 0x0F00u) >> 8u;
         unsigned char vxValue = registers[vxIndex];
-        qDebug() << "OP_Ex9E()";
 
         if (keypad[vxValue] == 0)
         {
@@ -464,7 +462,6 @@ private:
     {
         unsigned short vxIndex = (opcode & 0x0F00u) >> 8u;
         unsigned char vxValue = registers[vxIndex];
-        qDebug() << "OP_Ex9E()";
 
         if (keypad[vxValue] != 0)
         {
@@ -492,15 +489,18 @@ private:
         unsigned short vxIndex = (opcode & 0x0F00u) >> 8u;
         bool keyPressed = false; // Bool to determine if a key has been pressed
 
-
-        if (keypad[vxIndex]){
-            registers[vxIndex] = static_cast<unsigned char>(vxIndex);
-            qDebug() << "register[" <<vxIndex <<"] = " << vxIndex;
-            keyPressed = true;
-        }else{
-            pc -= 2;
+        while (!keyPressed)
+        { // Loop will not exit until a key has been pressed
+            for (int i = 0; i < 16; ++i)
+            { // Loop through each key on the keypad to see if it is pressed
+                if (keypad[i] != 0)
+                { // If a key is pressed, it is stored in register VX and the for and while loops are exited
+                    registers[vxIndex] = static_cast<unsigned char>(i);
+                    keyPressed = true;
+                    break;
+                }
+            }
         }
-
     }
     // Set the delay timer to the value of register VX
     void OP_Fx15()
