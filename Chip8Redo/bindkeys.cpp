@@ -325,11 +325,12 @@ void BindKeys::on_keySequenceEdit_9_editingFinished()
 void BindKeys::on_keySequenceEdit_0_editingFinished()
 {
     try {
+        /*
         for(int i = 0; i < 16; i++) {
-            if (ui->keySequenceEdit_9->keySequence() == bindKeys[i] && i != 0) {
+            if (ui->keySequenceEdit_9->keySequence() == bindKeys[i]) {
                 throw std::invalid_argument("This key is already assigned to another action");
             }
-        }
+        }*/
         QString keyString = ui->keySequenceEdit_9->keySequence().toString();
         QKeySequence keySequence = QKeySequence(keyString);
         int mainKey = keySequence[0];

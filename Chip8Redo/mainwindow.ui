@@ -196,9 +196,9 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="IconsResource.qrc">
-     <normaloff>:/Icons/Pause.PNG</normaloff>
-     <normalon>:/Icons/Play.PNG</normalon>:/Icons/Pause.PNG</iconset>
+    <iconset>
+     <normaloff>Icons/Pause.PNG</normaloff>
+     <normalon>Icons/Play.PNG</normalon>Icons/Pause.PNG</iconset>
    </property>
    <property name="text">
     <string>Pause</string>
@@ -215,8 +215,8 @@
   </action>
   <action name="actionColor">
    <property name="icon">
-    <iconset resource="IconsResource.qrc">
-     <normaloff>:/Icons/ColorPicker.png</normaloff>:/Icons/ColorPicker.png</iconset>
+    <iconset>
+     <normaloff>Icons/ColorPicker.png</normaloff>Icons/ColorPicker.png</iconset>
    </property>
    <property name="text">
     <string>Color</string>
@@ -226,8 +226,6 @@
    </property>
   </action>
  </widget>
- <resources>
-  <include location="IconsResource.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

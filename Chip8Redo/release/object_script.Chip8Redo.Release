@@ -1,0 +1,10 @@
+release/ApplicationLoop.o
+release/Chip8.o
+release/bindkeys.o
+release/keybinds.o
+release/main.o
+release/mainwindow.o
+release/qrc_IconsResource.o
+release/moc_bindkeys.o
+release/moc_keybinds.o
+release/moc_mainwindow.o
