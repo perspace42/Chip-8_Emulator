@@ -119,7 +119,7 @@ void BindKeys::on_keySequenceEdit_1_editingFinished()
 {
     try {
         for(int i = 0; i < 16; i++) {
-            if (ui->keySequenceEdit_0->keySequence() == bindKeys[i] && i != 0) { //Throws an error if the key selected matches any key found in the bindKeys array
+            if (ui->keySequenceEdit_0->keySequence() == bindKeys[i] && i != 1) { //Throws an error if the key selected matches any key found in the bindKeys array
                 throw std::invalid_argument("This key is already assigned to another action");
             }
         }
@@ -141,7 +141,7 @@ void BindKeys::on_keySequenceEdit_2_editingFinished()
 {
     try {
         for(int i = 0; i < 16; i++) {
-            if (ui->keySequenceEdit_1->keySequence() == bindKeys[i] && i != 1) {
+            if (ui->keySequenceEdit_1->keySequence() == bindKeys[i] && i != 2) {
                 throw std::invalid_argument("This key is already assigned to another action");
             }
         }
@@ -165,7 +165,7 @@ void BindKeys::on_keySequenceEdit_3_editingFinished()
 {
     try {
         for(int i = 0; i < 16; i++) {
-            if (ui->keySequenceEdit_2->keySequence() == bindKeys[i] && i != 2) {
+            if (ui->keySequenceEdit_2->keySequence() == bindKeys[i] && i != 3) {
                 throw std::invalid_argument("This key is already assigned to another action");
             }
         }
@@ -188,7 +188,7 @@ void BindKeys::on_keySequenceEdit_4_editingFinished()
 {
     try {
         for(int i = 0; i < 16; i++) {
-            if (ui->keySequenceEdit_3->keySequence() == bindKeys[i] && i != 3) {
+            if (ui->keySequenceEdit_3->keySequence() == bindKeys[i] && i != 4) {
                 throw std::invalid_argument("This key is already assigned to another action");
             }
         }
@@ -211,7 +211,7 @@ void BindKeys::on_keySequenceEdit_5_editingFinished()
 {
     try {
         for(int i = 0; i < 16; i++) {
-            if (ui->keySequenceEdit_4->keySequence() == bindKeys[i] && i != 4) {
+            if (ui->keySequenceEdit_4->keySequence() == bindKeys[i] && i != 5) {
                 throw std::invalid_argument("This key is already assigned to another action");
             }
         }
@@ -234,7 +234,7 @@ void BindKeys::on_keySequenceEdit_6_editingFinished()
 {
     try {
         for(int i = 0; i < 16; i++) {
-            if (ui->keySequenceEdit_5->keySequence() == bindKeys[i] && i != 5) {
+            if (ui->keySequenceEdit_5->keySequence() == bindKeys[i] && i != 6) {
                 throw std::invalid_argument("This key is already assigned to another action");
             }
         }
@@ -257,7 +257,7 @@ void BindKeys::on_keySequenceEdit_7_editingFinished()
 {
     try {
         for(int i = 0; i < 16; i++) {
-            if (ui->keySequenceEdit_6->keySequence() == bindKeys[i] && i != 6) {
+            if (ui->keySequenceEdit_6->keySequence() == bindKeys[i] && i != 7) {
                 throw std::invalid_argument("This key is already assigned to another action");
             }
         }
@@ -280,7 +280,7 @@ void BindKeys::on_keySequenceEdit_8_editingFinished()
 {
     try {
         for(int i = 0; i < 16; i++) {
-            if (ui->keySequenceEdit_7->keySequence() == bindKeys[i] && i != 7) {
+            if (ui->keySequenceEdit_7->keySequence() == bindKeys[i] && i != 8) {
                 throw std::invalid_argument("This key is already assigned to another action");
             }
         }
@@ -303,7 +303,7 @@ void BindKeys::on_keySequenceEdit_9_editingFinished()
 {
     try {
         for(int i = 0; i < 16; i++) {
-            if (ui->keySequenceEdit_8->keySequence() == bindKeys[i] && i != 8) {
+            if (ui->keySequenceEdit_8->keySequence() == bindKeys[i] && i != 9) {
                 throw std::invalid_argument("This key is already assigned to another action");
             }
         }
@@ -326,7 +326,7 @@ void BindKeys::on_keySequenceEdit_0_editingFinished()
 {
     try {
         for(int i = 0; i < 16; i++) {
-            if (ui->keySequenceEdit_9->keySequence() == bindKeys[i] && i != 9) {
+            if (ui->keySequenceEdit_9->keySequence() == bindKeys[i] && i != 0) {
                 throw std::invalid_argument("This key is already assigned to another action");
             }
         }
@@ -485,18 +485,21 @@ void BindKeys::on_keySequenceEdit_F_editingFinished()
 //to a vlaue of 1
 void BindKeys::handleKeyPress(Qt::Key key, Chip8& EmulatorRef)
 {
-    if(key >= bindKeys[0] && key <= bindKeys[15])
-        {
-            qDebug() << "Inside handle key press" << key;
-            EmulatorRef.keypad[key] = 1;
+    for (int index = 0; index < 16; index++){
+        if (key == bindKeys[index]){
+            EmulatorRef.keypad[index] = 1;
+            qDebug() << "Pressed Key: " << key << " Value: " << index;
         }
+    }
 }
 //This funcion handles the signal for a key release and sets the corresponding key value inside the emulator
 //to a vlaue of 0
 void BindKeys::handleKeyRelease(Qt::Key key, Chip8& EmulatorRef)
 {
-    if(key >= bindKeys[0] && key <= bindKeys[15])
-        {
-            EmulatorRef.keypad[key] = 0;
+    for (int index = 0; index < 16; index++){
+        if (key == bindKeys[index]){
+           EmulatorRef.keypad[index] = 0;
+           qDebug() << "Released Key: " << key << " Value: " << index;
         }
+    }
 }
