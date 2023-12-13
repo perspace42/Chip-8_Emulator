@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include <QKeyEvent>
-
+#include "Chip8.h"
 
 
 namespace Ui {
@@ -20,7 +20,6 @@ public:
 public slots:
     void handleKeyPress(Qt::Key key, Chip8& EmulatorRef);
     void handleKeyRelease(Qt::Key key, Chip8& EmulatorRef);
-
 private slots:
     void on_Close_clicked();
 
@@ -34,29 +33,29 @@ private slots:
 
     void on_keySequenceEdit_4_editingFinished();
 
-    void on_keySequenceEdit_Q_editingFinished();
+    void on_keySequenceEdit_5_editingFinished();
 
-    void on_keySequenceEdit_W_editingFinished();
+    void on_keySequenceEdit_6_editingFinished();
 
-    void on_keySequenceEdit_E_editingFinished();
+    void on_keySequenceEdit_7_editingFinished();
 
-    void on_keySequenceEdit_R_editingFinished();
+    void on_keySequenceEdit_8_editingFinished();
+
+    void on_keySequenceEdit_9_editingFinished();
+
+    void on_keySequenceEdit_0_editingFinished();
 
     void on_keySequenceEdit_A_editingFinished();
 
-    void on_keySequenceEdit_S_editingFinished();
-
-    void on_keySequenceEdit_D_editingFinished();
-
-    void on_keySequenceEdit_F_editingFinished();
-
-    void on_keySequenceEdit_Z_editingFinished();
-
-    void on_keySequenceEdit_X_editingFinished();
+    void on_keySequenceEdit_B_editingFinished();
 
     void on_keySequenceEdit_C_editingFinished();
 
-    void on_keySequenceEdit_V_editingFinished();
+    void on_keySequenceEdit_D_editingFinished();
+
+    void on_keySequenceEdit_E_editingFinished();
+
+    void on_keySequenceEdit_F_editingFinished();
 
 private:
     Ui::BindKeys *ui;
