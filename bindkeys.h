@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include <QKeyEvent>
-
+#include "Chip8.h"
 
 
 namespace Ui {
@@ -17,7 +17,9 @@ class BindKeys : public QDialog
 public:
     explicit BindKeys(QWidget *parent = nullptr);
     ~BindKeys();
-
+public slots:
+    void handleKeyPress(Qt::Key key, Chip8& EmulatorRef);
+    void handleKeyRelease(Qt::Key key, Chip8& EmulatorRef);
 private slots:
     void on_Close_clicked();
 
