@@ -37,7 +37,9 @@ DISTFILES += \
     ../../Pictures/Icons/Play.PNG \
     Icons/ColorPicker.png \
     Icons/Pause.PNG \
-    Icons/Play.PNG
+    Icons/Play.PNG \
+
+
 
 RESOURCES += \
     IconsResource.qrc
